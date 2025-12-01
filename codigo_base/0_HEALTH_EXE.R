@@ -7,11 +7,12 @@ library(lubridate)
 
 #################### Definicion Parametros ######################
 library(yaml)
-carpeta_base <- "C:/00_dev/00_playground/04_TEACH/UNO/2025/clases/health_economics_challenge"
+carpeta_base <- "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_economics_challenge"
 setwd(carpeta_base)
 objetos_trans_script <- c("experiment_dir","experiment_lead_dir","carpeta_base","objetos_trans_script")
 
-PARAMS <- yaml.load_file("./codigo_base/CONFIG_minimo_dsreducido.yml")
+PARAMS <- yaml.load_file("./codigo_base/CONFIG_prudente_excluye_covid.yml")
+
 
 # Carpetas de experimento
 experiment_dir <- paste(PARAMS$experiment$experiment_label,PARAMS$experiment$experiment_code,sep = "_")

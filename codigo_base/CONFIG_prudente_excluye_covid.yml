@@ -36,7 +36,7 @@ experiment:
   experiment_label: "hf3_max"
 
   # experiment_code: Nombre descriptivo de este experimento en particular
-  experiment_code: "max_minimo"
+  experiment_code: "prudente_excluye_covid"
 
   # NOTA: Los resultados se guardan en: exp/hf3_max_minimo/hf3_max_minimo_f1/
   #       donde "f1" indica que estamos prediciendo 1 año hacia adelante (lead=1)
@@ -77,10 +77,10 @@ feature_engineering:
 
     # canaritos_year_end: Año hasta el cual usar para entrenar canaritos
     # (típicamente el año antes del test)
-    canaritos_year_end: 2019
+    canaritos_year_end: 2018
 
     # canaritos_year_valid: Año usado para validación en el proceso de canaritos
-    canaritos_year_valid: 2019
+    canaritos_year_valid: 2018
 
     # campos_sort: Orden para organizar los datos (País, luego Año)
     campos_sort: ["Country Code", "year"]
@@ -122,7 +122,7 @@ feature_engineering:
       # correr: Array que indica qué lags crear
       # [TRUE, FALSE, FALSE...] = Solo crear lag de 1 año
       # Si pones [TRUE, TRUE, FALSE...] crearías lags de 1 y 2 años
-      correr: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      correr: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # lag: Define los períodos de retraso (1=año anterior, 2=hace 2 años, etc.)
       lag: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -143,26 +143,26 @@ feature_engineering:
 
     tendenciaYmuchomas:
       # correr: Qué ventanas activar. [TRUE, FALSE...] = Solo ventana de 2 años
-      correr: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      correr: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # ventana: Tamaño de cada ventana en años
       ventana: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 20]
 
       # tendencia: Si es TRUE, calcula la PENDIENTE (crecimiento/decrecimiento) en la ventana
       # Ejemplo: ¿El PIB está creciendo o cayendo en los últimos 2 años?
-      tendencia: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      tendencia: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # minimo: Si es TRUE, calcula el VALOR MÍNIMO en la ventana
       # Ejemplo: PIB más bajo en los últimos 2 años
-      minimo: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      minimo: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # maximo: Si es TRUE, calcula el VALOR MÁXIMO en la ventana
       # Ejemplo: Gasto en salud más alto en los últimos 2 años
-      maximo: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      maximo: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # promedio: Si es TRUE, calcula el PROMEDIO en la ventana
       # Ejemplo: Expectativa de vida promedio en los últimos 2 años
-      promedio: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      promedio: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # ratioavg: Si es TRUE, calcula VALOR_ACTUAL / PROMEDIO_VENTANA
       # Ejemplo: Si ratio > 1, el valor actual está por encima del promedio histórico
@@ -173,8 +173,7 @@ feature_engineering:
       ratiomax: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # canaritos: Filtro de importancia (0.0 = mantener todas)
-      canaritos: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-
+      canaritos: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]      
     # -------------------------------------------------------------------
     # VARIABLES ESPECÍFICAS DE HEALTH ECONOMICS
     # -------------------------------------------------------------------
