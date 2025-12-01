@@ -17,7 +17,7 @@
 # ============================================================================
 environment:
   # Directorio base del proyecto (donde están las carpetas codigo_base, dataset, exp)
-  base_dir: "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_economics_challenge"
+  base_dir: "C:/Users/rgotta_enterbyte/Desktop/Uno/Aplicaciones/health_economics_challenge"
 
   # Directorio donde están los datos de entrada
   data_dir: "./dataset"
@@ -77,10 +77,10 @@ feature_engineering:
 
     # canaritos_year_end: Año hasta el cual usar para entrenar canaritos
     # (típicamente el año antes del test)
-    canaritos_year_end: 2019
+    canaritos_year_end: 2016
 
     # canaritos_year_valid: Año usado para validación en el proceso de canaritos
-    canaritos_year_valid: 2019
+    canaritos_year_valid: 2016
 
     # campos_sort: Orden para organizar los datos (País, luego Año)
     campos_sort: ["Country Code", "year"]
@@ -198,7 +198,7 @@ feature_engineering:
     # canaritos_final: Filtro final de importancia después de crear todas las variables
     # 0.0 = Mantener todas las variables creadas
     # 0.1 = Solo mantener variables con importancia > 0.1
-    canaritos_final: 0.1
+    canaritos_final: 0.0
 
 # ============================================================================
 # SECCIÓN 4: TRAINING STRATEGY - Particionamiento de datos
