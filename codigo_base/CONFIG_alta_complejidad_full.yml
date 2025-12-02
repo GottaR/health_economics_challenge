@@ -1,0 +1,547 @@
+---
+# ============================================================================
+# CONFIGURACIÓN PARA DESAFÍO DE HEALTH ECONOMICS
+# Universidad del Oeste (UNO) - Aplicaciones en Ciencia de Datos
+# ============================================================================
+# Este archivo YAML define todos los parámetros para el pipeline de Machine Learning
+# que predice el gasto de bolsillo en salud (hf3_ppp_pc) para el año 2022.
+#
+# El pipeline tiene 3 etapas:
+#   1. Feature Engineering (01_FE): Creación de variables predictoras
+#   2. Training Strategy (02_TS): Particionamiento de datos en train/validate/test
+#   3. Hyperparameter Tuning (03_HT): Optimización de hiperparámetros con Bayesian Optimization
+# ============================================================================
+
+# ============================================================================
+# SECCIÓN 1: ENVIRONMENT - Configuración del entorno de trabajo
+# ============================================================================
+environment:
+  # Directorio base del proyecto (donde están las carpetas codigo_base, dataset, exp)
+  #base_dir: "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_economics_challenge"
+  base_dir: "C:/Users/rgotta_enterbyte/Desktop/Uno/Aplicaciones/health_economics_challenge"
+
+  # Directorio donde están los datos de entrada
+  data_dir: "./dataset"
+
+# ============================================================================
+# SECCIÓN 2: EXPERIMENT - Configuración general del experimento
+# ============================================================================
+experiment:
+  # restart: Si es TRUE, borra y reinicia el experimento. FALSE continúa desde donde quedó
+  restart: FALSE
+
+  # Directorio donde se guardarán todos los resultados del experimento
+  exp_dir: "./exp"
+
+  # experiment_label: Etiqueta principal del experimento (relacionada con la variable objetivo)
+  experiment_label: "hf3_max"
+
+  # experiment_code: Nombre descriptivo de este experimento en particular
+  experiment_code: "alta_complejidad_full"
+
+  # NOTA: Los resultados se guardan en: exp/hf3_max_minimo/hf3_max_minimo_f1/
+  #       donde "f1" indica que estamos prediciendo 1 año hacia adelante (lead=1)
+
+# ============================================================================
+# SECCIÓN 3: FEATURE ENGINEERING - Creación de variables predictoras
+# ============================================================================
+feature_engineering:
+
+  # --- Archivos de entrada/salida ---
+  files:
+    input:
+      # Dataset de entrada con datos históricos de salud y economía
+      dentrada: ["dataset_desafio.csv"]
+
+    # Script de R que ejecuta el feature engineering
+    fe_script: "01_FE_health.R"
+
+  # --- Constantes (no modificar a menos que sepas lo que haces) ---
+  const:
+    # origen_clase: Variable del dataset que contiene la variable objetivo
+    # hf3_ppp_pc = Gasto de bolsillo per capita en paridad de poder adquisitivo (PPP)
+    origen_clase: "hf3_ppp_pc"
+
+    # clase: Nombre de la variable objetivo después de transformarla
+    clase: "clase"
+
+    # orden_lead: Cuántos años hacia el futuro queremos predecir
+    # 1 = Predecir el año siguiente (desde 2021 predecir 2022)
+    orden_lead: 1
+
+    # presente: Último año disponible en el dataset (año más reciente con datos)
+    presente: 2021
+
+    # canaritos_year_start: Año desde el cual comenzar el análisis
+    # (años anteriores se descartan)
+    canaritos_year_start: 2000
+
+    # canaritos_year_end: Año hasta el cual usar para entrenar canaritos
+    # (típicamente el año antes del test)
+    canaritos_year_end: 2019
+
+    # canaritos_year_valid: Año usado para validación en el proceso de canaritos
+    canaritos_year_valid: 2019
+
+    # campos_sort: Orden para organizar los datos (País, luego Año)
+    campos_sort: ["Country Code", "year"]
+
+    # campos_rsort: Orden inverso (Año, luego País)
+    campos_rsort: ["year", "Country Code"]
+
+    # campos_fijos: Columnas que SIEMPRE se mantienen en el dataset
+    # Estas son las variables de identificación y la variable objetivo
+    campos_fijos: ["Country Name", "Country Code", "year", "region", "income", "hf3_ppp_pc","clase"]
+
+  # --- Parámetros de Feature Engineering ---
+  param:
+
+    # dummiesNA: Si es TRUE, crea variables dummy (0/1) indicando si había un valor faltante
+    # Esto es útil porque "falta de dato" puede ser información valiosa
+    # Ejemplo: si falta "gasto_salud", se crea "gasto_salud_NA" = 1
+    dummiesNA: TRUE
+
+    # corregir: Corrección de drift (cambios en la distribución de datos a lo largo del tiempo)
+    # "NO" = No aplicar corrección de drift
+    corregir: "NO"
+
+    # variablesmanuales: Si es TRUE, agrega variables creadas manualmente en el script FE
+    # (por ejemplo: ratios, interacciones, transformaciones específicas de salud)
+    variablesmanuales: TRUE
+
+    # acumulavars: Si es TRUE, acumula valores de variables a lo largo del tiempo
+    # FALSE = No crear variables acumuladas
+    acumulavars: FALSE
+
+    # -------------------------------------------------------------------
+    # LAGS: Variables retrasadas (valores de años anteriores)
+    # -------------------------------------------------------------------
+    # Los lags son cruciales en series de tiempo porque el pasado ayuda a predecir el futuro
+    # Ejemplo: El gasto en salud del año pasado (lag_1) es un buen predictor del gasto de este año
+
+    lags:
+      # correr: Array que indica qué lags crear
+      # [TRUE, FALSE, FALSE...] = Solo crear lag de 1 año
+      # Si pones [TRUE, TRUE, FALSE...] crearías lags de 1 y 2 años
+      correr: [TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+      # lag: Define los períodos de retraso (1=año anterior, 2=hace 2 años, etc.)
+      lag: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+      # delta: Si es TRUE, crea la DIFERENCIA entre el valor actual y el lag
+      # Ejemplo: delta_1_GDP = GDP_2021 - GDP_2020 (crecimiento del PIB)
+      delta: [TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+      # canaritos: Umbral de importancia. 0.0 = No filtrar variables por importancia
+      # Si pones 0.2, solo se mantienen variables con importancia > 0.2
+      canaritos: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    # -------------------------------------------------------------------
+    # TENDENCIAS Y ESTADÍSTICAS MÓVILES (rolling windows)
+    # -------------------------------------------------------------------
+    # Calcula estadísticas sobre ventanas de tiempo (ej: promedio de los últimos 2 años)
+    # Esto captura tendencias y patrones temporales
+
+    tendenciaYmuchomas:
+      # correr: Qué ventanas activar. [TRUE, FALSE...] = Solo ventana de 2 años
+      correr: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+      # ventana: Tamaño de cada ventana en años
+      ventana: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 20]
+
+      # tendencia: Si es TRUE, calcula la PENDIENTE (crecimiento/decrecimiento) en la ventana
+      # Ejemplo: ¿El PIB está creciendo o cayendo en los últimos 2 años?
+      tendencia: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+      # minimo: Si es TRUE, calcula el VALOR MÍNIMO en la ventana
+      # Ejemplo: PIB más bajo en los últimos 2 años
+      minimo: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+      # maximo: Si es TRUE, calcula el VALOR MÁXIMO en la ventana
+      # Ejemplo: Gasto en salud más alto en los últimos 2 años
+      maximo: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+      # promedio: Si es TRUE, calcula el PROMEDIO en la ventana
+      # Ejemplo: Expectativa de vida promedio en los últimos 2 años
+      promedio: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+      # ratioavg: Si es TRUE, calcula VALOR_ACTUAL / PROMEDIO_VENTANA
+      # Ejemplo: Si ratio > 1, el valor actual está por encima del promedio histórico
+      ratioavg: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+      # ratiomax: Si es TRUE, calcula VALOR_ACTUAL / MÁXIMO_VENTANA
+      # Ejemplo: ¿Qué tan cerca está el valor actual del máximo histórico?
+      ratiomax: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+
+      # canaritos: Filtro de importancia (0.0 = mantener todas)
+      canaritos: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+    # -------------------------------------------------------------------
+    # VARIABLES ESPECÍFICAS DE HEALTH ECONOMICS
+    # -------------------------------------------------------------------
+
+    # health_ratios: Crea ratios de eficiencia del sistema de salud
+    # Ejemplo: gasto_salud / PIB, expectativa_vida / gasto_salud, etc.
+    health_ratios: TRUE
+
+    # qaly_calculation: Calcula QALYs aproximados (Quality-Adjusted Life Years)
+    # Métrica que combina expectativa de vida y calidad de vida
+    qaly_calculation: TRUE
+
+    # crisis_dummies: Crea variables dummy para crisis económicas
+    # Ejemplo: dummy_crisis_2008, dummy_covid_2020
+    crisis_dummies: TRUE
+
+    # rankeador: Crea rankings relativos por región/nivel de ingreso
+    # Ejemplo: Posición del país en gasto de salud dentro de su región
+    rankeador: TRUE
+
+    # canaritos_final: Filtro final de importancia después de crear todas las variables
+    # 0.0 = Mantener todas las variables creadas
+    # 0.1 = Solo mantener variables con importancia > 0.1
+    canaritos_final: 0.0
+
+# ============================================================================
+# SECCIÓN 4: TRAINING STRATEGY - Particionamiento de datos
+# ============================================================================
+# Divide el dataset en diferentes conjuntos para entrenar y evaluar el modelo
+# Esto es crucial para evitar OVERFITTING (que el modelo memorice en lugar de aprender)
+training_strategy:
+
+  # --- Constantes ---
+  const:
+    # secciones: Los 5 conjuntos de datos que se crearán
+    # - present: Datos del 2021 (sin variable objetivo) para hacer predicciones de 2022
+    # - train: Datos antiguos para entrenar el modelo
+    # - validate: Datos para ajustar hiperparámetros
+    # - test: Datos para evaluar el modelo final (simula datos nunca vistos)
+    # - train_final: train + validate para entrenar el modelo final con más datos
+    secciones: ["present", "train", "validate", "test", "train_final"]
+
+    # clase: Nombre de la variable objetivo
+    clase: "clase"
+
+    # periodo: Campo que indica el tiempo (en este caso, año)
+    periodo: "year"
+
+    # campos_sort: Orden para organizar los datos
+    campos_sort: ["Country Code", "year"]
+
+  # --- Parámetros de particionamiento ---
+  param:
+    # semilla: Semilla para reproducibilidad (siempre genera las mismas particiones)
+    semilla: 102191
+
+    # NOTA IMPORTANTE: Los campos 'periodos' y 'rango$hasta' se calculan AUTOMÁTICAMENTE
+    # en el script 02_TS_health.R basándose en el año 'presente' (2021) y 'orden_lead' (1)
+    #
+    # El script calcula automáticamente:
+    #   - test: año 2020 (último año con clase disponible = 2021 - 1)
+    #   - validate: año 2019 (año anterior al test)
+    #   - train: desde 2000 hasta 2018 (2 años antes del test)
+    #   - train_final: desde 2000 hasta 2020 (incluye train + validate + test)
+    #   - present: año 2021 (sin clase, para predecir 2022)
+
+    # --- TRAIN: Conjunto de entrenamiento ---
+    train:
+      rango:
+        # desde: Año inicial para entrenamiento (ÚNICO campo que debes configurar)
+        desde: 2000
+        # hasta: Se calcula automáticamente (2018 en este caso)
+
+      # excluir: Lista de años específicos a excluir del training
+      # Ejemplo: [2008, 2009] excluiría los años de la crisis financiera
+      excluir: []
+
+      # undersampling: Reducir la cantidad de ciertos registros para balancear clases
+      # En regresión típicamente se deja vacío. Útil en clasificación desbalanceada
+      undersampling: []
+
+    # --- VALIDATE: Conjunto de validación ---
+    validate:
+      # periodos y rango se calculan automáticamente (año 2019 en este caso)
+      excluir: []
+      undersampling: []
+
+    # --- TEST: Conjunto de prueba ---
+    test:
+      # periodos y rango se calculan automáticamente (año 2020 en este caso)
+      excluir: []
+      undersampling: []
+
+    # --- TRAIN_FINAL: Entrenamiento final con más datos ---
+    train_final:
+      rango:
+        # desde: Año inicial (mismo que train)
+        desde: 2000
+        # hasta: Se calcula automáticamente (2020 en este caso)
+      excluir: []
+      undersampling: []
+
+  # --- Archivos de salida ---
+  files:
+    output:
+      # present_data: Datos de 2021 sin clase (para predecir 2022)
+      present_data: "TS_present_data.csv.gz"
+
+      # train_strategy: Datos de train + validate + test (con particiones marcadas)
+      train_strategy: "TS_train_strategy.csv.gz"
+
+      # train_final: Datos para entrenar el modelo final (train + validate + test)
+      train_final: "TS_train_final.csv.gz"
+
+      # control: Archivo de texto con resumen de las particiones (revisar siempre!)
+      control: "control.txt"
+
+    # Script que ejecuta el particionamiento
+    ts_script: "02_TS_health.R"
+
+# ============================================================================
+# SECCIÓN 5: HYPERPARAMETER TUNING - Optimización de hiperparámetros
+# ============================================================================
+# Usa Optimización Bayesiana para encontrar los mejores hiperparámetros de LightGBM
+# que minimicen el error de predicción (RMSE)
+hyperparameter_tuning:
+
+  # --- Configuración general ---
+  param:
+    # algoritmo: Algoritmo de Machine Learning a usar
+    algoritmo: "lightgbm"
+
+    # semilla: Para reproducibilidad de resultados
+    semilla: 999983
+
+    # crossvalidation: Si usar validación cruzada (divide train en K folds)
+    # FALSE = Usar conjunto de validación separado (más rápido)
+    crossvalidation: FALSE
+
+    # validate: Si TRUE, usa el conjunto 'validate' para evaluar durante el tuning
+    validate: TRUE
+
+    # -----------------------------------------------------------------------
+    # HIPERPARÁMETROS DE LIGHTGBM
+    # -----------------------------------------------------------------------
+    # FORMATO: [valor_mínimo, valor_máximo] = Rango a explorar por Bayesian Optimization
+    #          valor_fijo = No se optimiza, se usa ese valor siempre
+
+    lightgbm:
+
+      # --- Hiperparámetros de APRENDIZAJE ---
+
+      # learning_rate: Tasa de aprendizaje (cuánto aprende en cada iteración)
+      # Valores bajos (~0.01): Aprendizaje lento pero preciso (requiere más iteraciones)
+      # Valores altos (~0.2): Aprendizaje rápido pero puede ser inestable
+      # RANGO A EXPLORAR: [0.01, 0.2]
+      learning_rate: [0.01, 0.2]
+
+      # feature_fraction: Fracción de variables a usar en cada árbol
+      # 0.3 = Usa solo 30% de las variables (más rápido, previene overfitting)
+      # 0.9 = Usa 90% de las variables (más información, pero más lento)
+      # RANGO A EXPLORAR: [0.3, 0.9]
+      feature_fraction: [0.3, 0.9]
+
+      # num_leaves: Número de hojas en cada árbol
+      # Valores bajos (~10): Modelos simples (previenen overfitting)
+      # Valores altos (~1500): Modelos complejos (pueden overfittear)
+      # El tercer valor (1) indica que es un ENTERO
+      # RANGO A EXPLORAR: [10, 1500] (enteros)
+      num_leaves: [10, 1500, 1]
+
+      # min_data_in_leaf: Mínimo de registros necesarios en cada hoja
+      # Valores bajos (~5): Hojas con pocos datos (más detalle, riesgo de overfitting)
+      # Valores altos (~100): Hojas con muchos datos (más generalización)
+      # RANGO A EXPLORAR: [5, 100] (enteros)
+      min_data_in_leaf: [5, 250, 1]
+
+      # --- Hiperparámetros de REGULARIZACIÓN ---
+      # Ayudan a prevenir overfitting penalizando modelos complejos
+
+      # lambda_l1: Regularización L1 (Lasso)
+      # Tiende a eliminar variables poco importantes (coeficientes a 0)
+      # 0 = Sin regularización L1
+      # 5 = Regularización fuerte
+      # RANGO A EXPLORAR: [0, 5]
+      lambda_l1: [0, 5]
+
+      # lambda_l2: Regularización L2 (Ridge)
+      # Reduce el valor de los coeficientes sin eliminarlos
+      # 0 = Sin regularización L2
+      # 10 = Regularización fuerte
+      # RANGO A EXPLORAR: [0, 10]
+      lambda_l2: [0, 10]
+
+      # min_gain_to_split: Ganancia mínima para dividir un nodo
+      # 0 = Permite cualquier división (más flexible)
+      # Valores mayores previenen divisiones poco útiles
+      # VALOR FIJO: 0
+      min_gain_to_split: 0
+
+      # --- Hiperparámetros de BAGGING ---
+      # Bagging = Entrenar cada árbol con una muestra aleatoria de datos
+
+      # bagging_fraction: Fracción de datos a usar para entrenar cada árbol
+      # 0.6 = Usa 60% de los datos (más diversidad entre árboles)
+      # 1.0 = Usa 100% de los datos (menos diversidad)
+      # RANGO A EXPLORAR: [0.6, 1.0]
+      bagging_fraction: [0.6, 1.0]
+
+      # --- Hiperparámetros de ESTRUCTURA DE ÁRBOLES ---
+
+      # max_depth: Profundidad máxima de cada árbol
+      # -1 = Sin límite (el árbol crece lo necesario)
+      # Valores positivos limitan la profundidad (previenen overfitting)
+      # VALOR FIJO: -1 (sin límite, num_leaves ya controla complejidad)
+      max_depth: -1
+
+      # max_bin: Máximo de bins para discretizar variables continuas
+      # 255 = Valor estándar (buen balance entre precisión y velocidad)
+      # VALOR FIJO: 255
+      max_bin: 255
+
+      # --- Hiperparámetros de REPRODUCIBILIDAD ---
+
+      # seed: Semilla para números aleatorios dentro de LightGBM
+      seed: 999983
+
+      # extra_trees: Si TRUE, usa Extremely Randomized Trees
+      # FALSE = Usa la estrategia estándar de división (mejor para la mayoría de casos)
+      extra_trees: FALSE
+
+      # --- Hiperparámetros de EVALUACIÓN ---
+
+      # metric: Métrica de error a minimizar
+      # "rmse" = Root Mean Squared Error (raíz del error cuadrático medio)
+      # Penaliza fuertemente errores grandes
+      metric: "rmse"
+
+      # first_metric_only: Si TRUE, solo usa la primera métrica para early stopping
+      first_metric_only: TRUE
+
+      # objective: Tipo de problema a resolver
+      # "regression" = Problema de regresión (predecir valor continuo)
+      objective: "regression"
+
+      # --- Hiperparámetros TÉCNICOS ---
+
+      # boost_from_average: Si TRUE, inicializa desde el promedio de la variable objetivo
+      # TRUE = Convergencia más rápida (recomendado)
+      boost_from_average: TRUE
+
+      # force_row_wise: Si TRUE, fuerza procesamiento por filas
+      # TRUE = Más rápido para datasets con muchas variables
+      force_row_wise: TRUE
+
+      # feature_pre_filter: Si TRUE, pre-filtra variables antes de entrenar
+      # FALSE = Usa todas las variables (recomendado)
+      feature_pre_filter: FALSE
+
+      # boosting: Tipo de boosting
+      # "gbdt" = Gradient Boosting Decision Tree (estándar, más efectivo)
+      # Alternativas: "dart" (con dropout), "goss" (muestreo de gradientes)
+      boosting: "gbdt"
+
+      # num_threads: Número de threads para paralelización
+      # 0 = Usa todos los cores disponibles
+      num_threads: 0
+
+      # verbosity y verbose: Nivel de mensajes en consola
+      # -100 = Silencioso (no muestra nada)
+      verbosity: -100
+      verbose: -100
+
+    # -----------------------------------------------------------------------
+    # CONFIGURACIÓN DE BAYESIAN OPTIMIZATION (BO)
+    # -----------------------------------------------------------------------
+    # La BO busca inteligentemente en el espacio de hiperparámetros
+    # para encontrar la mejor combinación en pocas iteraciones
+
+    BO:
+      # iterations: Número de combinaciones de hiperparámetros a probar
+      # 100 iteraciones es un buen balance entre tiempo y calidad de resultados
+      # Menos iteraciones = Más rápido pero peores resultados
+      # Más iteraciones = Más lento pero mejores resultados
+      iterations: 100
+
+      # noisy: Si TRUE, asume que la evaluación tiene ruido (variabilidad)
+      # TRUE = Recomendado (hay variabilidad en el proceso de entrenamiento)
+      noisy: TRUE
+
+      # minimize: Si TRUE, busca MINIMIZAR la métrica (RMSE en este caso)
+      # TRUE = Queremos el menor error posible
+      minimize: TRUE
+
+      # has.simple.signature: Configuración técnica de mlrMBO
+      # FALSE = Pasar parámetros como lista (formato usado en este pipeline)
+      has.simple.signature: FALSE
+
+      # save.on.disk.at.time: Cada cuántos segundos guardar el progreso
+      # 600 segundos = 10 minutos
+      # Permite retomar si se interrumpe el proceso
+      save.on.disk.at.time: 600
+
+  # --- Archivos de entrada/salida ---
+  files:
+    input:
+      # dentrada: Dataset con las particiones train/validate/test
+      dentrada: "TS_train_strategy.csv.gz"
+
+    output:
+      # BOlog: Log con todas las iteraciones y sus resultados (revisar siempre!)
+      BOlog: "BO_log.txt"
+
+      # BObin: Archivo binario para retomar la optimización si se interrumpe
+      BObin: "BO_bin.Rdata"
+
+      # tb_importancia: Tabla con la importancia de cada variable
+      # Ayuda a entender qué variables son más relevantes para la predicción
+      tb_importancia: "tb_importancia.txt"
+
+      # importancia: Prefijo para archivos de importancia intermedios
+      # Se guarda un archivo cada vez que se encuentra un mejor modelo
+      importancia: "impo_"
+
+    # Script que ejecuta la optimización de hiperparámetros
+    ht_script: "03_HT_health.R"
+
+  # --- Constantes ---
+  const:
+    # campo_clase: Nombre de la variable objetivo en el dataset
+    campo_clase: "clase"
+
+    # campo_periodo: Nombre de la variable temporal (año)
+    campo_periodo: "year"
+
+# ============================================================================
+# FIN DEL ARCHIVO DE CONFIGURACIÓN
+# ============================================================================
+#
+# RECOMENDACIONES PARA ALUMNOS DE LA UNO:
+#
+# 1. EXPERIMENTACIÓN:
+#    - Copia este archivo con otro nombre (ej: CONFIG_experimento1.yml)
+#    - Modifica UN parámetro a la vez para ver su efecto
+#    - Documenta tus cambios y resultados
+#
+# 2. PARÁMETROS CLAVE PARA MODIFICAR:
+#    - feature_engineering -> lags -> correr: Prueba con más lags
+#    - feature_engineering -> tendenciaYmuchomas -> correr: Prueba más ventanas
+#    - hyperparameter_tuning -> lightgbm: Ajusta los rangos de búsqueda
+#    - hyperparameter_tuning -> BO -> iterations: Más iteraciones = mejores resultados
+#
+# 3. ARCHIVOS A REVISAR DESPUÉS DE CORRER:
+#    - exp/hf3_max_minimo/hf3_max_minimo_f1/02_TS/control.txt (verifica particiones)
+#    - exp/hf3_max_minimo/hf3_max_minimo_f1/03_HT/BO_log.txt (resultados de BO)
+#    - exp/hf3_max_minimo/hf3_max_minimo_f1/03_HT/tb_importancia.txt (variables importantes)
+#
+# 4. CÓMO EJECUTAR:
+#    - Modifica la línea 14 de codigo_base/0_HEALTH_EXE.R con el nombre de tu YAML
+#    - Ejecuta: source("codigo_base/0_HEALTH_EXE.R")
+#    - Espera a que termine (puede tomar horas según iterations)
+#
+# 5. MÉTRICAS DE ÉXITO:
+#    - RMSE más bajo en el conjunto de TEST
+#    - Predicciones coherentes con la realidad de 2022
+#    - Modelo que generaliza bien (no overfitting)
+#
+# ¡Éxitos en el desafío! 🎓📊
+# ============================================================================
