@@ -77,10 +77,10 @@ feature_engineering:
 
     # canaritos_year_end: Año hasta el cual usar para entrenar canaritos
     # (típicamente el año antes del test)
-    canaritos_year_end: 2018  # 2 años antes de presente
+    canaritos_year_end: 2017  # 2 años antes de presente
 
     # canaritos_year_valid: Año usado para validación en el proceso de canaritos
-    canaritos_year_valid: 2018 # Validar en 2018
+    canaritos_year_valid: 2017 # Validar en 2018
 
     # campos_sort: Orden para organizar los datos (País, luego Año)
     campos_sort: ["Country Code", "year"]
@@ -144,22 +144,22 @@ feature_engineering:
 
     tendenciaYmuchomas:
       # correr: Qué ventanas activar. [TRUE, FALSE...] = Solo ventana de 3 años (Venta de 2 y 5 años)
-      correr: [TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      correr: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
       
       #ventana: Tamaño de cada ventana en años
       ventana: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 20]
 
       # tendencia: Si es TRUE, calcula la PENDIENTE (crecimiento/decrecimiento) en la ventana
       # Ejemplo: ¿El PIB está creciendo o cayendo en los últimos 3 años?
-      tendencia: [TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      tendencia: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
        
       # minimo: Si es TRUE, calcula el VALOR MÍNIMO en la ventana
       # Ejemplo: PIB más bajo en los últimos 3 años
-      minimo: [TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      minimo: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
   
       # maximo: Si es TRUE, calcula el VALOR MÁXIMO en la ventana
       # Ejemplo: Gasto en salud más alto en los últimos 3 años
-      maximo: [TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      maximo: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
       
       # promedio: Si es TRUE, calcula el PROMEDIO en la ventana
       # Ejemplo: Expectativa de vida promedio en los últimos 3 años
@@ -199,7 +199,7 @@ feature_engineering:
     # canaritos_final: Filtro final de importancia después de crear todas las variables
     # 0.0 = Mantener todas las variables creadas
     # 0.1 = Solo mantener variables con importancia > 0.1
-    canaritos_final: 0.05
+    canaritos_final: 0.00
 
 # ============================================================================
 # SECCIÓN 4: TRAINING STRATEGY - Particionamiento de datos
