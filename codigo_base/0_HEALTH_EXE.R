@@ -7,12 +7,12 @@ library(lubridate)
 
 #################### Definicion Parametros ######################
 library(yaml)
-#carpeta_base <- "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_economics_challenge"
-carpeta_base <- "C:/Users/rgotta_enterbyte/Desktop/Uno/Aplicaciones/health_economics_challenge"
+carpeta_base <- "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_economics_challenge"
+#carpeta_base <- "C:/Users/rgotta_enterbyte/Desktop/Uno/Aplicaciones/health_economics_challenge"
 setwd(carpeta_base)
 objetos_trans_script <- c("experiment_dir","experiment_lead_dir","carpeta_base","objetos_trans_script")
 
-PARAMS <- yaml.load_file("./codigo_base/CONFIG_conservadora_sin_covid.yml")
+PARAMS <- yaml.load_file("./codigo_base/CONFIG_alta_complejidad_full.yml")
 
 
 # Carpetas de experimento
