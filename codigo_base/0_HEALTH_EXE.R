@@ -12,7 +12,7 @@ carpeta_base <- "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_econ
 setwd(carpeta_base)
 objetos_trans_script <- c("experiment_dir","experiment_lead_dir","carpeta_base","objetos_trans_script")
 
-PARAMS <- yaml.load_file("./codigo_base/CONFIG_conservadora_sin_covid.yml")
+PARAMS <- yaml.load_file("./codigo_base/CONFIG_alta_complejidad_full_con_todos_los_ratios.yml")
 
 
 # Carpetas de experimento

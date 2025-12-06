@@ -37,7 +37,7 @@ experiment:
   experiment_label: "hf3_max"
 
   # experiment_code: Nombre descriptivo de este experimento en particular
-  experiment_code: "alta_complejidad_full"
+  experiment_code: "alta_complejidad_full_con_todos_los_ratios"
 
   # NOTA: Los resultados se guardan en: exp/hf3_max_minimo/hf3_max_minimo_f1/
   #       donde "f1" indica que estamos prediciendo 1 año hacia adelante (lead=1)
@@ -54,7 +54,7 @@ feature_engineering:
       dentrada: ["dataset_desafio.csv"]
 
     # Script de R que ejecuta el feature engineering
-    fe_script: "01_FE_health.R"
+    fe_script: "01_FE_health_todos_los_ratios.R"
 
   # --- Constantes (no modificar a menos que sepas lo que haces) ---
   const:
