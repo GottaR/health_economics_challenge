@@ -154,7 +154,7 @@
         "tb_importancia": "tb_importancia.txt",
         "importancia": "impo_"
       },
-      "ht_script": "03_HT_health.R"
+      "ht_script": "03_HT_health_v2.R"
     },
     "const": {
       "campo_clase": "clase",

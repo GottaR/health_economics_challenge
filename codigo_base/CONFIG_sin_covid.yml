@@ -36,7 +36,7 @@ experiment:
   experiment_label: "hf3_max"
 
   # experiment_code: Nombre descriptivo de este experimento en particular
-  experiment_code: "max_minimo"
+  experiment_code: "sin_covid"
 
   # NOTA: Los resultados se guardan en: exp/hf3_max_minimo/hf3_max_minimo_f1/
   #       donde "f1" indica que estamos prediciendo 1 año hacia adelante (lead=1)
@@ -66,10 +66,10 @@ feature_engineering:
 
     # orden_lead: Cuántos años hacia el futuro queremos predecir
     # 1 = Predecir el año siguiente (desde 2021 predecir 2022)
-    orden_lead: 1
+    orden_lead: 3
 
     # presente: Último año disponible en el dataset (año más reciente con datos)
-    presente: 2021
+    presente: 2019
 
     # canaritos_year_start: Año desde el cual comenzar el análisis
     # (años anteriores se descartan)
@@ -77,10 +77,10 @@ feature_engineering:
 
     # canaritos_year_end: Año hasta el cual usar para entrenar canaritos
     # (típicamente el año antes del test)
-    canaritos_year_end: 2019
+    canaritos_year_end: 2016
 
     # canaritos_year_valid: Año usado para validación en el proceso de canaritos
-    canaritos_year_valid: 2019
+    canaritos_year_valid: 2016
 
     # campos_sort: Orden para organizar los datos (País, luego Año)
     campos_sort: ["Country Code", "year"]
@@ -500,7 +500,7 @@ hyperparameter_tuning:
       importancia: "impo_"
 
     # Script que ejecuta la optimización de hiperparámetros
-    ht_script: "03_HT_health_v2.R"
+    ht_script: "03_HT_health.R"
 
   # --- Constantes ---
   const:

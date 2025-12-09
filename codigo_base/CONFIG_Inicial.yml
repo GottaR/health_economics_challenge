@@ -36,7 +36,7 @@ experiment:
   experiment_label: "hf3_max"
 
   # experiment_code: Nombre descriptivo de este experimento en particular
-  experiment_code: "max_minimo"
+  experiment_code: "inicial"
 
   # NOTA: Los resultados se guardan en: exp/hf3_max_minimo/hf3_max_minimo_f1/
   #       donde "f1" indica que estamos prediciendo 1 año hacia adelante (lead=1)
@@ -500,7 +500,7 @@ hyperparameter_tuning:
       importancia: "impo_"
 
     # Script que ejecuta la optimización de hiperparámetros
-    ht_script: "03_HT_health_v2.R"
+    ht_script: "03_HT_health.R"
 
   # --- Constantes ---
   const:

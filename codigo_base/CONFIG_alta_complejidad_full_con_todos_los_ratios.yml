@@ -14,10 +14,11 @@
 
 # ============================================================================
 # SECCIÓN 1: ENVIRONMENT - Configuración del entorno de trabajo
-# ============================  ================================================
+# ============================================================================
 environment:
   # Directorio base del proyecto (donde están las carpetas codigo_base, dataset, exp)
   base_dir: "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_economics_challenge"
+  #base_dir: "C:/Users/rgotta_enterbyte/Desktop/Uno/Aplicaciones/health_economics_challenge"
 
   # Directorio donde están los datos de entrada
   data_dir: "./dataset"
@@ -36,7 +37,7 @@ experiment:
   experiment_label: "hf3_max"
 
   # experiment_code: Nombre descriptivo de este experimento en particular
-  experiment_code: "max_minimo"
+  experiment_code: "alta_complejidad_full_con_todos_los_ratios"
 
   # NOTA: Los resultados se guardan en: exp/hf3_max_minimo/hf3_max_minimo_f1/
   #       donde "f1" indica que estamos prediciendo 1 año hacia adelante (lead=1)
@@ -53,7 +54,7 @@ feature_engineering:
       dentrada: ["dataset_desafio.csv"]
 
     # Script de R que ejecuta el feature engineering
-    fe_script: "01_FE_health.R"
+    fe_script: "01_FE_health_todos_los_ratios.R"
 
   # --- Constantes (no modificar a menos que sepas lo que haces) ---
   const:
@@ -122,14 +123,14 @@ feature_engineering:
       # correr: Array que indica qué lags crear
       # [TRUE, FALSE, FALSE...] = Solo crear lag de 1 año
       # Si pones [TRUE, TRUE, FALSE...] crearías lags de 1 y 2 años
-      correr: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      correr: [TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # lag: Define los períodos de retraso (1=año anterior, 2=hace 2 años, etc.)
       lag: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
       # delta: Si es TRUE, crea la DIFERENCIA entre el valor actual y el lag
       # Ejemplo: delta_1_GDP = GDP_2021 - GDP_2020 (crecimiento del PIB)
-      delta: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      delta: [TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # canaritos: Umbral de importancia. 0.0 = No filtrar variables por importancia
       # Si pones 0.2, solo se mantienen variables con importancia > 0.2
@@ -143,30 +144,30 @@ feature_engineering:
 
     tendenciaYmuchomas:
       # correr: Qué ventanas activar. [TRUE, FALSE...] = Solo ventana de 2 años
-      correr: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      correr: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # ventana: Tamaño de cada ventana en años
       ventana: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 20]
 
       # tendencia: Si es TRUE, calcula la PENDIENTE (crecimiento/decrecimiento) en la ventana
       # Ejemplo: ¿El PIB está creciendo o cayendo en los últimos 2 años?
-      tendencia: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      tendencia: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # minimo: Si es TRUE, calcula el VALOR MÍNIMO en la ventana
       # Ejemplo: PIB más bajo en los últimos 2 años
-      minimo: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      minimo: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # maximo: Si es TRUE, calcula el VALOR MÁXIMO en la ventana
       # Ejemplo: Gasto en salud más alto en los últimos 2 años
-      maximo: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      maximo: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # promedio: Si es TRUE, calcula el PROMEDIO en la ventana
       # Ejemplo: Expectativa de vida promedio en los últimos 2 años
-      promedio: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      promedio: [TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # ratioavg: Si es TRUE, calcula VALOR_ACTUAL / PROMEDIO_VENTANA
       # Ejemplo: Si ratio > 1, el valor actual está por encima del promedio histórico
-      ratioavg: [TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
+      ratioavg: [TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE]
 
       # ratiomax: Si es TRUE, calcula VALOR_ACTUAL / MÁXIMO_VENTANA
       # Ejemplo: ¿Qué tan cerca está el valor actual del máximo histórico?
@@ -500,7 +501,7 @@ hyperparameter_tuning:
       importancia: "impo_"
 
     # Script que ejecuta la optimización de hiperparámetros
-    ht_script: "03_HT_health_v2.R"
+    ht_script: "03_HT_health.R"
 
   # --- Constantes ---
   const:
