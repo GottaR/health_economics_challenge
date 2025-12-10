@@ -189,8 +189,8 @@ AgregarVariables <- function(dataset) {
   
   # Estabilidad del deflactor
   dataset[, price_stability := 
-            ifelse(!is.na(NY.GDP.DEFL.ZS_lag1),
-                   abs(NY.GDP.DEFL.ZS - NY.GDP.DEFL.ZS_lag1),
+            ifelse(!is.na(NY.GDP.DEFL.ZS),
+                   abs(NY.GDP.DEFL.ZS - NY.GDP.DEFL.ZS),
                    NA_real_)]
 
   # --- VÁLVULAS DE SEGURIDAD ---

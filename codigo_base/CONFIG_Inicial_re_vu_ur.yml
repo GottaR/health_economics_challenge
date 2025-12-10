@@ -17,8 +17,10 @@
 # ============================  ================================================
 environment:
   # Directorio base del proyecto (donde están las carpetas codigo_base, dataset, exp)
-  base_dir: "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_economics_challenge"
-
+  #base_dir: "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_economics_challenge"
+  base_dir: "C:/Users/rgotta_enterbyte/Desktop/Uno/Aplicaciones/health_economics_challenge"
+  
+  
   # Directorio donde están los datos de entrada
   data_dir: "./dataset"
 
@@ -36,7 +38,7 @@ experiment:
   experiment_label: "hf3_max"
 
   # experiment_code: Nombre descriptivo de este experimento en particular
-  experiment_code: "inicial_geo_eco_sal"
+  experiment_code: "inicial_re_vu_ur"
 
   # NOTA: Los resultados se guardan en: exp/hf3_max_minimo/hf3_max_minimo_f1/
   #       donde "f1" indica que estamos prediciendo 1 año hacia adelante (lead=1)
@@ -53,7 +55,7 @@ feature_engineering:
       dentrada: ["dataset_desafio.csv"]
 
     # Script de R que ejecuta el feature engineering
-    fe_script: "01_FE_health_eco_geo_sal.R"
+    fe_script: "01_FE_health_re_vu_ur.R"
 
   # --- Constantes (no modificar a menos que sepas lo que haces) ---
   const:

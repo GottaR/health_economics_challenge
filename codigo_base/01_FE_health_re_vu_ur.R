@@ -159,6 +159,65 @@ AgregarVariables <- function(dataset) {
   # }
   # --- GRUPO 4: COMERCIO Y APERTURA ECONÓMICA ---
   # Variables de comercio internacional en top features
+  # --- GRUPO 7: VARIABLES DE CONTEXTO REGIONAL ---
+  # Crear dummies para efectos de región/ingreso
+  
+  # Dummy: Países de ingreso bajo (mayor gasto de bolsillo esperado)
+  dataset[, is_low_income := ifelse(income == "Low income", 1, 0)]
+  
+  # Dummy: Países de ingreso alto (menor gasto de bolsillo esperado)
+  dataset[, is_high_income := ifelse(income == "High income", 1, 0)]
+  
+  # Dummy: Región con históricamente alto gasto de bolsillo
+  dataset[, is_vulnerable_region := 
+            ifelse(region %in% c("South Asia", "Sub-Saharan Africa"), 1, 0)]
+  
+  # --- GRUPO 8: INTERACCIONES CLAVE ---
+  # Combinaciones no lineales de variables importantes
+  
+  # Interacción: Ruralidad x Pobreza (bajo GDP per capita)
+  dataset[, rural_poverty_interaction := 
+            SP.RUR.TOTL.ZS * (1 / (NY.GDP.PCAP.KD + 1000))]
+  
+  # Interacción: Urbanización x Capacidad económica
+  dataset[, urban_wealth_interaction := 
+            SP.URB.TOTL.IN.ZS * NY.GDP.PCAP.KD / 10000]
+  
+  # Interacción: Mortalidad x Falta de recursos
+  dataset[, health_crisis_indicator := 
+            SH.DTH.MORT * (1 / (NE.CON.PRVT.PC.KD + 100))]
+  
+  # --- GRUPO 9: TENDENCIAS TEMPORALES PERSONALIZADAS ---
+  # Capturar aceleración/desaceleración en variables clave
+  
+  # Aceleración del GDP (segunda derivada)
+  dataset[, gdp_acceleration := 
+            ifelse(!is.na(NY.GDP.PCAP.KD_delta1_lag1) & !is.na(NY.GDP.PCAP.KD_delta1),
+                   NY.GDP.PCAP.KD_delta1 - NY.GDP.PCAP.KD_delta1_lag1,
+                   NA_real_)]
+  
+  # Momentum de crecimiento urbano
+  dataset[, urbanization_momentum := 
+            ifelse(!is.na(SP.URB.TOTL.IN.ZS_lag1),
+                   SP.URB.TOTL.IN.ZS - SP.URB.TOTL.IN.ZS_lag1,
+                   NA_real_)]
+  
+  # --- GRUPO 10: INDICADORES COMPUESTOS DE VULNERABILIDAD ---
+  # Combinar múltiples señales en un índice
+  
+  # Índice de vulnerabilidad sanitaria (0-1, mayor = más vulnerable)
+  dataset[, health_vulnerability_index := 
+            (SH.DTH.MORT / 100 * 0.4 +  # 40% mortalidad infantil
+               SP.RUR.TOTL.ZS / 100 * 0.3 +  # 30% ruralidad
+               (1 / (NY.GDP.PCAP.KD / 10000 + 1)) * 0.3)  # 30% pobreza
+  ]
+  
+  # Índice de capacidad económica (0-1, mayor = más capacidad)
+  dataset[, economic_capacity_index := 
+            ((NY.GDP.PCAP.KD / 50000) * 0.5 +  # 50% GDP per capita (normalizado)
+               (NE.CON.PRVT.PC.KD / 30000) * 0.3 +  # 30% consumo privado
+               (SP.URB.TOTL.IN.ZS / 100) * 0.2)  # 20% urbanización
+  ]
   
   # Dependencia de exportaciones (mayor comercio = más desarrollo)
   dataset[, trade_openness := 

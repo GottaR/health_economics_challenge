@@ -12,7 +12,7 @@ carpeta_base <- "C:/Users/rgotta_enterbyte/Desktop/Uno/Aplicaciones/health_econo
 setwd(carpeta_base)
 objetos_trans_script <- c("experiment_dir","experiment_lead_dir","carpeta_base","objetos_trans_script")
 
-PARAMS <- yaml.load_file("./codigo_base/CONFIG_Inicial_eco_geo_salud.yml")
+PARAMS <- yaml.load_file("./codigo_base/CONFIG_Inicial_re_vu_ur.yml")
 
 
 # Carpetas de experimento
