@@ -157,8 +157,6 @@ AgregarVariables <- function(dataset) {
   # if(PARAMS$feature_engineering$param$health_ratios) {
   #   dataset[, mi_ratio := variable1 / (variable2 + 1)]  # +1 para evitar división por 0
   # }
-  # --- GRUPO 4: COMERCIO Y APERTURA ECONÓMICA ---
-  # Variables de comercio internacional en top features
   # --- GRUPO 7: VARIABLES DE CONTEXTO REGIONAL ---
   # Crear dummies para efectos de región/ingreso
   
@@ -192,14 +190,14 @@ AgregarVariables <- function(dataset) {
   
   # Aceleración del GDP (segunda derivada)
   dataset[, gdp_acceleration := 
-            ifelse(!is.na(NY.GDP.PCAP.KD_delta1_lag1) & !is.na(NY.GDP.PCAP.KD_delta1),
-                   NY.GDP.PCAP.KD_delta1 - NY.GDP.PCAP.KD_delta1_lag1,
+            ifelse(!is.na(NY.GDP.PCAP.KD) & !is.na(NY.GDP.PCAP.KD),
+                   NY.GDP.PCAP.KD - NY.GDP.PCAP.KD,
                    NA_real_)]
   
   # Momentum de crecimiento urbano
   dataset[, urbanization_momentum := 
-            ifelse(!is.na(SP.URB.TOTL.IN.ZS_lag1),
-                   SP.URB.TOTL.IN.ZS - SP.URB.TOTL.IN.ZS_lag1,
+            ifelse(!is.na(SP.URB.TOTL.IN.ZS),
+                   SP.URB.TOTL.IN.ZS - SP.URB.TOTL.IN.ZS,
                    NA_real_)]
   
   # --- GRUPO 10: INDICADORES COMPUESTOS DE VULNERABILIDAD ---
@@ -218,39 +216,6 @@ AgregarVariables <- function(dataset) {
                (NE.CON.PRVT.PC.KD / 30000) * 0.3 +  # 30% consumo privado
                (SP.URB.TOTL.IN.ZS / 100) * 0.2)  # 20% urbanización
   ]
-  
-  # Dependencia de exportaciones (mayor comercio = más desarrollo)
-  dataset[, trade_openness := 
-            TX.VAL.MRCH.R2.ZS / (NE.EXP.GNFS.ZS + 1)]
-  
-  # Diversificación de exportaciones (menos concentración = más estabilidad)
-  dataset[, export_concentration := 
-            ifelse(!is.na(TX.VAL.MRCH.RS.ZS),
-                   100 - TX.VAL.MRCH.RS.ZS,
-                   NA_real_)]
-  
-  # --- GRUPO 5: INVERSIÓN EN CAPITAL HUMANO ---
-  # Educación y salud están correlacionados
-  
-  # Ratio inversión educativa vs económica
-  dataset[, human_capital_priority := 
-            SE.TER.ENRR / (NY.GDP.PCAP.KD / 1000 + 1)]
-  
-  # Cobertura de vacunación como proxy de acceso a salud pública
-  dataset[, vaccination_coverage_proxy := 
-            ifelse(!is.na(SH.IMM.IDPT), SH.IMM.IDPT / 100, NA_real_)]
-  
-  # --- GRUPO 6: ESTABILIDAD MACROECONÓMICA ---
-  # Inflación y deflación afectan el poder adquisitivo
-  
-  # Volatilidad de precios (deflactor GDP)
-  dataset[, price_instability := abs(NY.GDP.DEFL.ZS - 100)]
-  
-  # Estabilidad del deflactor
-  dataset[, price_stability := 
-            ifelse(!is.na(NY.GDP.DEFL.ZS_lag1),
-                   abs(NY.GDP.DEFL.ZS - NY.GDP.DEFL.ZS_lag1),
-                   NA_real_)]
 
   # --- VÁLVULAS DE SEGURIDAD ---
   # Estas secciones protegen al dataset de valores problemáticos
