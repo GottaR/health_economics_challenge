@@ -18,11 +18,10 @@
 environment:
   # Directorio base del proyecto (donde están las carpetas codigo_base, dataset, exp)
   base_dir: "C:/Users/julie/OneDrive/Escritorio/UNO/Aplicaciones/health_economics_challenge"
-  #base_dir: "C:/Users/rgotta_enterbyte/Desktop/Uno/Aplicaciones/health_economics_challenge"
-  
-  
+
   # Directorio donde están los datos de entrada
   data_dir: "./dataset"
+
 # ============================================================================
 # SECCIÓN 2: EXPERIMENT - Configuración general del experimento
 # ============================================================================
@@ -37,7 +36,7 @@ experiment:
   experiment_label: "hf3_max"
 
   # experiment_code: Nombre descriptivo de este experimento en particular
-  experiment_code: "inicial_re_vu_ur"
+  experiment_code: "covid_Parcial_san_eco"
 
   # NOTA: Los resultados se guardan en: exp/hf3_max_minimo/hf3_max_minimo_f1/
   #       donde "f1" indica que estamos prediciendo 1 año hacia adelante (lead=1)
@@ -54,7 +53,7 @@ feature_engineering:
       dentrada: ["dataset_desafio.csv"]
 
     # Script de R que ejecuta el feature engineering
-    fe_script: "01_FE_health_re_vu_ur.R"
+    fe_script: "01_FE_health_san_eco.R"
 
   # --- Constantes (no modificar a menos que sepas lo que haces) ---
   const:
@@ -67,10 +66,10 @@ feature_engineering:
 
     # orden_lead: Cuántos años hacia el futuro queremos predecir
     # 1 = Predecir el año siguiente (desde 2021 predecir 2022)
-    orden_lead: 1
+    orden_lead: 2
 
     # presente: Último año disponible en el dataset (año más reciente con datos)
-    presente: 2021
+    presente: 2020
 
     # canaritos_year_start: Año desde el cual comenzar el análisis
     # (años anteriores se descartan)
@@ -78,10 +77,10 @@ feature_engineering:
 
     # canaritos_year_end: Año hasta el cual usar para entrenar canaritos
     # (típicamente el año antes del test)
-    canaritos_year_end: 2019
+    canaritos_year_end: 2017
 
     # canaritos_year_valid: Año usado para validación en el proceso de canaritos
-    canaritos_year_valid: 2019
+    canaritos_year_valid: 2017
 
     # campos_sort: Orden para organizar los datos (País, luego Año)
     campos_sort: ["Country Code", "year"]
@@ -199,7 +198,7 @@ feature_engineering:
     # canaritos_final: Filtro final de importancia después de crear todas las variables
     # 0.0 = Mantener todas las variables creadas
     # 0.1 = Solo mantener variables con importancia > 0.1
-    canaritos_final: 0.0
+    canaritos_final: 0.00
 
 # ============================================================================
 # SECCIÓN 4: TRAINING STRATEGY - Particionamiento de datos
